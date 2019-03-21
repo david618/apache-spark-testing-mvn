@@ -1,19 +1,46 @@
 package com.esri.realtime.stream
 
+import java.util.concurrent.TimeUnit
+import org.apache.kafka.clients.producer.{KafkaProducer, ProducerConfig, ProducerRecord}
+import org.apache.kafka.common.serialization.{LongSerializer, StringSerializer}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.streaming.{GroupState, GroupStateTimeout, Trigger}
-import org.slf4j.{Logger, LoggerFactory}
+import scala.collection.JavaConversions._
 
 object FlightCounter {
 
-  private val LOGGER: Logger = LoggerFactory.getLogger(classOf[Flight])
+  private var bootstrap: String = ""
+  private var topic: String = ""
+
+  @transient private lazy val producer: KafkaProducer[String, Long] = {
+    val config: Map[String, Object] = Map(
+      ProducerConfig.BOOTSTRAP_SERVERS_CONFIG -> bootstrap,
+      ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG -> classOf[StringSerializer],
+      ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG -> classOf[LongSerializer],
+      ProducerConfig.BATCH_SIZE_CONFIG -> "163840", // 160 KB
+      ProducerConfig.ACKS_CONFIG -> "1",            // 0, 1, or all
+      ProducerConfig.LINGER_MS_CONFIG -> "10",      // time in ms to wait before sending a batch just in case more records come in
+      ProducerConfig.MAX_REQUEST_SIZE_CONFIG -> (25 * 1024 * 1024).toString,  // Default is 1 MB or 1 * 1024 * 1024, setting it to 25MB
+      ProducerConfig.RETRIES_CONFIG -> "0",
+      ProducerConfig.LINGER_MS_CONFIG -> "1",
+      ProducerConfig.BUFFER_MEMORY_CONFIG -> "33554432"
+    )
+
+    println(s"New Kafka producer, config: $config")
+    val producer = new KafkaProducer[String, Long](config)
+    sys.addShutdownHook {
+      println(s"Closing Kafka producer... config: $config")
+      producer.close(100L, TimeUnit.MILLISECONDS)
+    }
+    producer
+  }
 
   case class Flight(flightId: String, flightTime: String,
                     longitude: Double, latitude: Double,
                     origin: String, destination: String,
                     aircraft: String, altitude: Long)
 
-  case class FlightCount(flightId: String, count: Int)
+  case class FlightCount(flightId: String, count: Long)
 
   def updateFlightCount(flightId: String,
                         updates: Iterator[Flight],
@@ -29,8 +56,7 @@ object FlightCounter {
 
     state.update(flightState)
 
-    LOGGER.warn(s"Flight[$flightId] was seen ${flightState.count} times")
-    println(s"Flight[$flightId] was seen ${flightState.count} times")
+    producer.send(new ProducerRecord[String, Long](s"$topic-counts", flightId, flightState.count))
 
     flightState
   }
@@ -38,9 +64,12 @@ object FlightCounter {
   def main(args: Array[String]): Unit = {
 
     if (args.length != 2) {
-      System.err.println("Usage: FlightCounter <kafka brokers> <kafka topics>")
+      System.err.println("Usage: FlightCounter <bootstrap servers> <kafka topic>")
       System.exit(1)
     }
+
+    bootstrap = args(0)
+    topic = args(1)
 
     val spark = SparkSession
       .builder
@@ -52,8 +81,8 @@ object FlightCounter {
     val df = spark
       .readStream
       .format("kafka")
-      .option("kafka.bootstrap.servers", args(0))
-      .option("subscribe", args(1))
+      .option("kafka.bootstrap.servers", bootstrap)
+      .option("subscribe", topic)
       .load()
 
     val flights = df
