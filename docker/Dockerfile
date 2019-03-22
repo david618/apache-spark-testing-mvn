@@ -45,7 +45,7 @@ COPY bin /opt/spark/bin
 COPY sbin /opt/spark/sbin
 COPY ${img_path}/spark/entrypoint.sh /opt/
 COPY examples /opt/spark/examples
-COPY conf/log4j.properties /opt/spark/log4j.properties
+COPY log4j.properties /opt/spark/log4j.properties
 COPY log4j2conf.xml /opt/spark/log4j2conf.xml
 COPY ${k8s_tests} /opt/spark/tests
 COPY data /opt/spark/data
