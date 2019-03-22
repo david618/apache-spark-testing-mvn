@@ -70,7 +70,16 @@ Update received for flightId=ASA3, longitude=-89.78130970899997, latitude=44.798
 Update received for flightId=SWA2706, longitude=-79.95414262199995, latitude=33.654397964000054!
 ```
 
+### Exploring Kafka 
 
+To explore the "gateway" kafka installed by default on A4IOT.
 
+```
+kubectl exec -it gateway-cp-kafka-0 --container cp-kafka-broker bash
 
+kafka-topics --zookeeper gateway-cp-zookeeper:2181 --list
+
+kafka-console-consumer --bootstrap-server gateway-cp-kafka:9092 --topic flight-stateful-counts     --property print.key=true     --property value.deserializer=org.apache.kafka.common.serialization.LongDeserializer
+
+```
 
