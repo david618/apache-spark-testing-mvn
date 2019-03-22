@@ -12,6 +12,7 @@ object FlightCounter {
   private var bootstrap: String = ""
   private var topic: String = ""
 
+
   @transient private lazy val producer: KafkaProducer[String, Long] = {
     val config: Map[String, Object] = Map(
       ProducerConfig.BOOTSTRAP_SERVERS_CONFIG -> bootstrap,
@@ -46,6 +47,7 @@ object FlightCounter {
                         updates: Iterator[Flight],
                         state: GroupState[FlightCount]): FlightCount = {
 
+
     var flightState = state.getOption.getOrElse {
       FlightCount(flightId, 0)
     }
@@ -57,6 +59,8 @@ object FlightCounter {
     state.update(flightState)
 
     producer.send(new ProducerRecord[String, Long](s"$topic-counts", flightId, flightState.count))
+
+    println("Flight: " + flightId + ":" + flightState.count)
 
     flightState
   }
@@ -82,6 +86,7 @@ object FlightCounter {
       .readStream
       .format("kafka")
       .option("kafka.bootstrap.servers", bootstrap)
+      .option("startingOffsets", "latest")
       .option("subscribe", topic)
       .load()
 
