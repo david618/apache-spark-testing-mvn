@@ -1,0 +1,46 @@
+---
+apiVersion: "sparkoperator.k8s.io/v1beta1"
+kind: SparkApplication
+metadata:
+  name: flight-streaming
+  namespace: default
+spec:
+  type: Scala
+  mode: cluster
+  image: "david62243/spark-testing-stateful:0.1"
+  imagePullPolicy: Always
+  mainClass: com.esri.a4iot.StreamingApp
+  arguments:
+    - "gateway-cp-kafka:9092"
+    - "group1"
+    - "flight-stateful"
+    - "15"
+  mainApplicationFile: "local:///opt/spark/spark-testing-stateful-full.jar"
+  sparkVersion: "2.4.0"
+  sparkConfigMap: spark-conf
+  restartPolicy:
+    type: Never
+  volumes:
+    - name: "test-volume"
+      hostPath:
+        path: "/tmp"
+        type: Directory
+  driver:
+    cores: 0.1
+    coreLimit: "200m"
+    memory: "512m"
+    labels:
+      version: 2.4.0
+    serviceAccount: spark
+    volumeMounts:
+      - name: "test-volume"
+        mountPath: "/tmp"
+  executor:
+    cores: 1
+    instances: 1
+    memory: "512m"
+    labels:
+      version: 2.4.0
+    volumeMounts:
+      - name: "test-volume"
+        mountPath: "/tmp"

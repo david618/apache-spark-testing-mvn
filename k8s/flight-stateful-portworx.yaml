@@ -1,0 +1,68 @@
+#
+# You'll need to create a config map before creating this SparkApplication
+#
+# kubectl create configmap spark-conf --from-file=spark-conf
+#
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: spark-data
+  annotations:
+    volume.beta.kubernetes.io/storage-class: portworx-spark-sc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1beta1
+metadata:
+  name: portworx-spark-sc
+provisioner: kubernetes.io/portworx-volume
+parameters:
+  repl: "1"
+---
+apiVersion: "sparkoperator.k8s.io/v1beta1"
+kind: SparkApplication
+metadata:
+  name: flight-stateful-px
+  namespace: default
+spec:
+  type: Scala
+  mode: cluster
+  image: "david62243/apache-spark-testing:0.1"
+  imagePullPolicy: Always
+  mainClass: com.esri.realtime.stream.FlightLastKnownPositionKeeper
+  mainApplicationFile: "local:///opt/spark/apache-spark-testing-assembly-0.1.jar"
+  arguments:
+    - gateway-cp-kafka:9092
+    - flight-stateful
+  sparkVersion: "2.4.0"
+  sparkConfigMap: spark-conf
+  restartPolicy:
+    type: Always
+  volumes:
+    - name: "spark-data"
+      persistentVolumeClaim:
+        claimName: spark-data
+  driver:
+    cores: 0.1
+    coreLimit: "200m"
+    memory: "512m"
+    labels:
+      version: 2.4.0
+    serviceAccount: spark
+    volumeMounts:
+      - name: "spark-data"
+        mountPath: "/data"
+  executor:
+    cores: 1
+    instances: 1
+    memory: "512m"
+    labels:
+      version: 2.4.0
+    volumeMounts:
+      - name: "spark-data"
+        mountPath: "/data"
