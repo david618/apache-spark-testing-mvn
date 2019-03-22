@@ -22,7 +22,7 @@
         <kafka-clients.version>2.1.1</kafka-clients.version>
         <scala.dep.version>2.11</scala.dep.version>
         <es.version>6.6.1</es.version>
-        <mainClass>com.esri.a4iot.Hello</mainClass>
+        <mainClass>com.esri.realtime.stream.FlightLastKnownPositionKeeper</mainClass>
         <datastax.version>6.7.1</datastax.version>
         <junit.version>4.12</junit.version>
         <scala.test.version>2.2.6</scala.test.version>
@@ -52,7 +52,6 @@
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql-kafka-0-10_${scala.dep.version}</artifactId>
             <version>${spark.version}</version>
-            <!--<scope>provided</scope>-->
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.apache.kafka/kafka-clients -->
