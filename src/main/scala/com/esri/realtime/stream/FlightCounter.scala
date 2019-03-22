@@ -7,6 +7,19 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.streaming.{GroupState, GroupStateTimeout, Trigger}
 import scala.collection.JavaConversions._
 
+
+/*
+
+You can watch the counts topic using kafka-console-consumer.sh
+
+For example:
+./bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic flight-stateful-counts \
+    --property print.key=true \
+    --property value.deserializer=org.apache.kafka.common.serialization.LongDeserializer
+
+
+ */
+
 object FlightCounter {
 
   private var bootstrap: String = ""
