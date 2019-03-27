@@ -1,0 +1,63 @@
+apiVersion: sparkoperator.k8s.io/v1beta1
+kind: SparkApplication
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"sparkoperator.k8s.io/v1beta1","kind":"SparkApplication","metadata":{"annotations":{},"name":"flight-stateful-counts","namespace":"default"},"spec":{"arguments":["gateway-cp-kafka:9092","flight-stateful"],"driver":{"coreLimit":"200m","cores":0.1,"labels":{"version":"2.4.0"},"memory":"512m","serviceAccount":"spark"},"executor":{"cores":1,"instances":2,"labels":{"version":"2.4.0"},"memory":"512m"},"image":"vplechnoy/apache-spark-testing:0.1","imagePullPolicy":"Always","mainApplicationFile":"local:///opt/spark/apache-spark-testing-mvn.jar","mainClass":"com.esri.realtime.stream.FlightCounter","mode":"cluster","restartPolicy":{"type":"Always"},"sparkConf":{"spark.driver.extraClassPath":"/opt/spark/dependency-jars/*","spark.driver.extraJavaOptions":"-Dlog4j.configurationFile=/opt/spark/log4j2conf.xml","spark.executor.extraClassPath":"/opt/spark/dependency-jars/*","spark.executor.extraJavaOptions":"-Dlog4j.configurationFile=/opt/spark/log4j2conf.xml"},"sparkVersion":"2.4.0","type":"Scala"}}
+  creationTimestamp: "2019-03-24T21:08:09Z"
+  generation: 1
+  name: flight-stateful-counts
+  namespace: default
+  resourceVersion: "2088011"
+  selfLink: /apis/sparkoperator.k8s.io/v1beta1/namespaces/default/sparkapplications/flight-stateful-counts
+  uid: ed8a715c-4e78-11e9-880a-56570bd3a56d
+spec:
+  arguments:
+  - gateway-cp-kafka:9092
+  - flight-stateful
+  deps: {}
+  driver:
+    coreLimit: 200m
+    cores: 0.1
+    labels:
+      version: 2.4.0
+    memory: 512m
+    serviceAccount: spark
+  executor:
+    cores: 1
+    instances: 3
+    labels:
+      version: 2.4.0
+    memory: 512m
+  image: vplechnoy/apache-spark-testing:0.1
+  imagePullPolicy: Always
+  mainApplicationFile: local:///opt/spark/apache-spark-testing-mvn.jar
+  mainClass: com.esri.realtime.stream.FlightCounter
+  mode: cluster
+  restartPolicy:
+    onFailureRetryInterval: 5
+    onSubmissionFailureRetryInterval: 5
+    type: Always
+  sparkConf:
+    spark.driver.extraClassPath: /opt/spark/dependency-jars/*
+    spark.driver.extraJavaOptions: -Dlog4j.configurationFile=/opt/spark/log4j2conf.xml
+    spark.executor.extraClassPath: /opt/spark/dependency-jars/*
+    spark.executor.extraJavaOptions: -Dlog4j.configurationFile=/opt/spark/log4j2conf.xml
+  sparkVersion: 2.4.0
+  type: Scala
+status:
+  applicationState:
+    errorMessage: ""
+    state: RUNNING
+  driverInfo:
+    podName: flight-stateful-counts-driver
+    webUIPort: 30072
+    webUIServiceName: flight-stateful-counts-ui-svc
+  executionAttempts: 5
+  executorState:
+    flight-stateful-counts-1553529071570-exec-1: RUNNING
+    flight-stateful-counts-1553529071570-exec-2: RUNNING
+  lastSubmissionAttemptTime: "2019-03-25T15:51:13Z"
+  sparkApplicationId: spark-application-1553529112501
+  submissionAttempts: 5
+  terminationTime: null
