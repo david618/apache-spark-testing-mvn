@@ -1,9 +1,7 @@
 package com.esri.realtime.stream
 
 import java.nio.ByteBuffer
-
 import com.esri.arcgis.st.geometry.SpatialReference
-import com.esri.arcgis.st.op.OperatorProject
 import com.esri.arcgis.st.{Feature, FeatureSchema}
 import com.esri.core.geometry.Point
 import com.esri.realtime.core.featureFunctions
@@ -13,7 +11,6 @@ import org.apache.kafka.common.errors.SerializationException
 import org.apache.kafka.common.serialization.StringSerializer
 import org.apache.spark.sql.streaming.{GroupState, GroupStateTimeout, Trigger}
 import org.apache.spark.sql.{Dataset, Encoder, SparkSession}
-
 import scala.collection.JavaConversions._
 
 object EnterExitDetector1 {
@@ -42,7 +39,6 @@ object EnterExitDetector1 {
       )
 
       val producer = new KafkaProducer[String, String](producerConfig)
-//      val value = featureTrack.latest.map(feature => if (feature.geometry == null) 0 else 1).getOrElse(2)
       val point = featureTrack.latest.map(_.geometry).get.asInstanceOf[Point]
       val pointAsString = if (point == null) "null" else s"Point(${point.getX}, ${point.getY}, ${point.getZ})"
       producer.send(new ProducerRecord[String, String](s"$topic-state", trackId, pointAsString))
@@ -184,12 +180,14 @@ object EnterExitDetector1 {
       })
 
     // null geometry
+    // Version 1 - Works!
 //    def nullFeatureGeometry(feature: Feature)(implicit featureSchema: FeatureSchema): Feature = feature.copyFeature(geometry = null)
 //    def datasetTransformer(transformation: Feature => Feature)(ds: Dataset[Feature]): Dataset[Feature] = {
 //      ds.map(feature => transformation(feature))(featureEncoder)
 //    }
 //    val transformed = ds.transform(ds => ds.transform(datasetTransformer(nullFeatureGeometry)))
 
+    // Version 2 - Works!
 //    def nullFeatureGeometry(feature: Feature, featureSchema: FeatureSchema): Feature = feature.copyFeature(geometry = null)
 
     def datasetTransformer(transformation: (Feature, FeatureSchema) => Feature)(ds: Dataset[Feature]): Dataset[Feature] = {
@@ -199,6 +197,7 @@ object EnterExitDetector1 {
     val projector = Projector(SpatialReference(3857))
     val transformed = ds.transform(ds => ds.transform(datasetTransformer(projector.execute)))
 
+    // Version 3 - Doesn't work!
 //    val transformed = ds.transform(ds => {
 //      val rdd = ds.rdd.withFeatureSchema(featureSchema)
 //      val projector = new OperatorProject(featureSchema, SpatialReference(3857))
