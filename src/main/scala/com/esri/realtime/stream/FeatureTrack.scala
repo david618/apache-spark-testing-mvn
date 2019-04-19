@@ -138,25 +138,31 @@ case class FeatureTrack(purger: FeatureTrackPurger)(implicit val featureSchema: 
   }
 }
 
+trait FeatureOrder extends Comparator[Feature] with Serializable
+
+class ChronologicalFeatureOrder extends FeatureOrder {
+  override def compare(feature1: Feature, feature2: Feature): Int = {
+    if (feature1.time.before(feature2.time))
+      -1
+    else if (feature1.time.after(feature2.time))
+      1
+    else
+      0
+  }
+}
+
+class ReversedFeatureOrder extends FeatureOrder {
+  override def compare(feature1: Feature, feature2: Feature): Int = {
+    if (feature1.time.before(feature2.time))
+      1
+    else if (feature1.time.after(feature2.time))
+      -1
+    else
+      0
+  }
+}
+
 object FeatureOrder {
-  val chronological: Comparator[Feature] = new Comparator[Feature] {
-    override def compare(feature1: Feature, feature2: Feature): Int = {
-      if (feature1.time.before(feature2.time))
-        -1
-      else if (feature1.time.after(feature2.time))
-        1
-      else
-        0
-    }
-  }
-  val reversed: Comparator[Feature] = new Comparator[Feature] {
-    override def compare(feature1: Feature, feature2: Feature): Int = {
-      if (feature1.time.before(feature2.time))
-        1
-      else if (feature1.time.after(feature2.time))
-        -1
-      else
-        0
-    }
-  }
+  def chronological: Comparator[Feature] = new ChronologicalFeatureOrder()
+  def reversed: Comparator[Feature] = new ReversedFeatureOrder()
 }
