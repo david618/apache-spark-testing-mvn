@@ -17,7 +17,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <jdk.version>1.8</jdk.version>
         <scala.version>2.11.12</scala.version>
-        <spark.version>2.4.0</spark.version>
+        <spark.version>2.4.1</spark.version>
         <log4j.version>2.11.2</log4j.version>
         <kafka-clients.version>2.1.1</kafka-clients.version>
         <scala.dep.version>2.11</scala.dep.version>
@@ -29,6 +29,7 @@
         <a4iot.version>0.10.21</a4iot.version>
         <st.version>RT-1.0.0.0-SNAPSHOT</st.version>
         <arcgis.version>10.7.1.0-SNAPSHOT</arcgis.version>
+        <json4s.version>3.5.3</json4s.version>
     </properties>
 
     <dependencyManagement>
@@ -149,9 +150,25 @@
                 </exclusions>
             </dependency>
             <dependency>
+                <groupId>org.apache.spark</groupId>
+                <artifactId>spark-sql-kafka-0-10_${scala.dep.version}</artifactId>
+                <version>${spark.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.spark</groupId>
+                        <artifactId>spark-core_${scala.dep.version}</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
                 <groupId>com.esri.geometry</groupId>
                 <artifactId>geometry-api-java-full</artifactId>
                 <version>${arcgis.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.json4s</groupId>
+                <artifactId>json4s-jackson_${scala.dep.version}</artifactId>
+                <version>${json4s.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -171,16 +188,24 @@
         </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
-            <artifactId>spark-streaming_${scala.dep.version}</artifactId>
+            <artifactId>spark-sql_${scala.dep.version}</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
-            <artifactId>spark-sql_${scala.dep.version}</artifactId>
+            <artifactId>spark-sql-kafka-0-10_${scala.dep.version}</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-streaming-kafka-0-10_${scala.dep.version}</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.json4s</groupId>
+            <artifactId>json4s-jackson_${scala.dep.version}</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-client</artifactId>
-            <version>2.6.5</version>
+            <version>2.7.3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.hadoop</groupId>
