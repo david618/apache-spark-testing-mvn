@@ -191,7 +191,7 @@ object EnterExitDetectorRT {
       ds.map(feature => transformation(feature, featureSchema))(featureEncoder)
     }
 
-    val projector = Projector(SpatialReference(3857))
+    val projector = SimplifiedProjector(SpatialReference(3857))
     //val transformed = ds.transform(ds => ds.transform(datasetTransformer(projector.execute)))
 
     val transformed = ds.mapPartitions(iter => {

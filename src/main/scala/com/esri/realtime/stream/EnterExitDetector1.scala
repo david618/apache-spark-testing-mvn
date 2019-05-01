@@ -3,7 +3,6 @@ package com.esri.realtime.stream
 import java.nio.ByteBuffer
 
 import com.esri.arcgis.st.geometry.SpatialReference
-import com.esri.arcgis.st.spark.featureRDDFunctions
 import com.esri.arcgis.st.{Feature, FeatureSchema}
 import com.esri.core.geometry.Point
 import com.esri.realtime.core.featureFunctions
@@ -13,7 +12,6 @@ import org.apache.kafka.common.errors.SerializationException
 import org.apache.kafka.common.serialization.StringSerializer
 import org.apache.spark.sql.streaming.{GroupState, GroupStateTimeout, Trigger}
 import org.apache.spark.sql.{Dataset, Encoder, SparkSession}
-
 import scala.collection.JavaConversions._
 
 object EnterExitDetector1 {
@@ -193,12 +191,12 @@ object EnterExitDetector1 {
     // Version 2 - Works!
 //    def nullFeatureGeometry(feature: Feature, featureSchema: FeatureSchema): Feature = feature.copyFeature(geometry = null)
 
-//    def datasetTransformer(transformation: (Feature, FeatureSchema) => Feature)(ds: Dataset[Feature]): Dataset[Feature] = {
-//      ds.map(feature => transformation(feature, featureSchema))(featureEncoder)
-//    }
+    def datasetTransformer(transformation: (Feature, FeatureSchema) => Feature)(ds: Dataset[Feature]): Dataset[Feature] = {
+      ds.map(feature => transformation(feature, featureSchema))(featureEncoder)
+    }
 
-    val projector = Projector(SpatialReference(3857))
-//    val transformed = ds.transform(ds => ds.transform(datasetTransformer(projector.execute)))
+    val projector = SimplifiedProjector(SpatialReference(3857))
+    val transformed = ds.transform(ds => ds.transform(datasetTransformer(projector.execute)))
 
     // Version 3 - Doesn't work!
 //    val transformed = ds.transform(ds => {
@@ -210,9 +208,9 @@ object EnterExitDetector1 {
 //      spark.createDataset(results)
 //    })
 
-    val transformed = ds.mapPartitions(iter => {
-      iter.map(feature => projector.execute(feature, featureSchema))
-    })
+//    val transformed = ds.mapPartitions(iter => {
+//      iter.map(feature => projector.execute(feature, featureSchema))
+//    })
 
     transformed
       .groupByKey(_.trackId(featureSchema)) // group features by trackId

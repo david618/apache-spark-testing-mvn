@@ -71,6 +71,11 @@
                 <version>${a4iot.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.esri.realtime</groupId>
+                <artifactId>realtime-analysis</artifactId>
+                <version>${a4iot.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.esri.arcgis.spatiotemporal</groupId>
                 <artifactId>arcgis-st-op-core</artifactId>
                 <version>${st.version}</version>
@@ -177,6 +182,10 @@
         <dependency>
             <groupId>com.esri.realtime</groupId>
             <artifactId>realtime-messaging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.esri.realtime</groupId>
+            <artifactId>realtime-analysis</artifactId>
         </dependency>
         <dependency>
             <groupId>com.esri.arcgis.spatiotemporal</groupId>
